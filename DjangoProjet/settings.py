@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'accounts',
     'home',
     'publications',
+    'shop',
 ]
 
 MIDDLEWARE = [
@@ -134,4 +135,4 @@ LOGIN_URL = '/accounts/login/'  # Redirige vers la page de connexion si l'utilis
 LOGIN_REDIRECT_URL = '/'  # Redirige vers la page d'accueil après la connexion réussie
 
 MEDIA_URL = '/media/'  # URL de base pour accéder aux fichiers (dans les templates)
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

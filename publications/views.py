@@ -55,3 +55,12 @@ def ajouter_publication(request):
     else:
         form = PublicationForm()
     return render(request, 'publications/ajouter_publication.html', {'form': form})
+
+@login_required
+def supprimer_publication(request, id):
+    publication = get_object_or_404(Publication, id=id)
+    
+    # Vérifier si l'utilisateur est l'auteur de la publication
+    if publication.auteur == request.user:
+        publication.delete()  # Supprimer la publication
+    return redirect('liste_publications')
