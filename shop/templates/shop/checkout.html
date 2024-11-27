@@ -1,0 +1,51 @@
+{% extends "shop/base.html" %}
+
+{% block content %}
+
+<div class="container">
+
+    <div class="row">
+        <div class="container col-md-12 mt-4">
+            <ul class="list-group" id="item-list">
+                <h1 class="text-center">Vous liste(s) de produit(s) ajouté(s)</h1>
+            </ul>
+        </div>
+    </div>
+    
+    <form>
+        <button type="submit" class="btn btn-primary mt-5">Commander</button>
+    </form>
+
+</div>
+
+{% endblock content %}
+
+{% block scripts %}
+    <script type="text/javascript">
+        if(localStorage.getItem('panier') == null){
+            var panier = {}
+        }else{
+            panier = JSON.parse(localStorage.getItem('panier'))
+        }
+
+        for (let item in panier) {
+            let nom = panier[item][1];  // Nom de l'article
+            let quantite = panier[item][0];  // Quantité de l'article
+    
+            // Affichage dans la console pour déboguer
+            console.log("Nom = " + nom + "  Qte  :  " + quantite);
+    
+            // Création d'un élément de liste avec nom et quantité
+            var itemList = `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${nom} 
+                    <span class="badge badge-pill badge-danger" style="color:blue">Qte : ${quantite}</span>
+                </li>
+            `;
+    
+            // Ajout de l'élément à la liste
+            $("#item-list").append(itemList);
+        }
+
+    </script>
+{% endblock scripts %}

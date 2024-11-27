@@ -48,9 +48,14 @@
         $(document).on('click', '.ajouter', function () {
             var item_id = this.id.toString();
             if (panier[item_id] != undefined) {
-                panier[item_id] += 1;
+
+                var quantite = panier[item_id][0] + 1
+                panier[item_id][0] = quantite
+
             } else {
-                panier[item_id] = 1;
+                var quantite = 1
+                var nom = document.getElementById("a" + item_id).innerHTML
+                panier[item_id]= [quantite, nom]
             }
             console.log(panier);
             localStorage.setItem('panier', JSON.stringify(panier));
@@ -65,9 +70,11 @@
             panierListe += '<h6>Listes de(s) produit(s) ajouté(s) : </h6>'
             var index = 1
             for (var i in panier){
-                panierListe += index + '. ' + document.getElementById("a" + i).innerHTML + ' --->  Qte :  ' +  panier[i] + '<br>'
+                panierListe += index + '. ' + document.getElementById("a" + i).innerHTML + ' --->  Qte :  ' +  panier[i][0] + '<br>'
                 index += 1
             }
+
+            panierListe += "</br><a href='{% url 'checkout' %}' class='btn btn-primary'>Checkout</a>"
             
             $('[data-toggle="popover"]').popover();
             document.getElementById('panier').setAttribute('data-content', panierListe)

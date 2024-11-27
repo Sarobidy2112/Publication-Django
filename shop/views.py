@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 from .models import Product
 
 
@@ -24,4 +25,14 @@ def detail(request, produit_id):
 
     return render(request, 'shop/detail.html', {
         'produit': produit
+    })
+
+@login_required
+def checkout(request):
+    if request.method == "POST":
+        user = request.user
+        userId = user.id
+        
+    return render(request, 'shop/checkout.html', {
+        
     })
