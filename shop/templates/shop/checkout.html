@@ -29,10 +29,9 @@
             Passer la commande
         </button>
     </form>
-
 </div>
-
 {% endblock content %}
+
 
 {% block scripts %}
 <script type="text/javascript">
@@ -48,40 +47,84 @@
     let totalPrice = 0;
 
     // Vérifier si le panier est vide
-    if (Object.keys(panier).length === 0) {
-        emptyMessage.style.display = "block";
-        checkoutButton.disabled = true;
-    } else {
-        emptyMessage.style.display = "none";
-        checkoutButton.disabled = false;
+    function updatePanier() {
+        itemList.innerHTML = '';
+        totalPrice = 0;
 
-        // Ajouter les articles du panier à la liste
-        for (let item in panier) {
-            let details = panier[item]; // Récupérer les données du produit
+        if (Object.keys(panier).length === 0) {
+            emptyMessage.style.display = "block";
+            checkoutButton.disabled = true;
+        } else {
+            emptyMessage.style.display = "none";
+            checkoutButton.disabled = false;
 
-            let quantite = parseInt(details[0]); // Quantité
-            let nom = details[1]; // Nom du produit
-            let prixUnitaire = parseFloat(details[2]); // Prix unitaire (converti en float)
+            // Ajouter les articles du panier à la liste
+            for (let item in panier) {
+                let details = panier[item];
+                let quantite = parseInt(details[0]); // Quantité
+                let nom = details[1]; // Nom du produit
+                let prixUnitaire = parseFloat(details[2]); // Prix unitaire
 
-            let totalProduit = quantite * prixUnitaire; // Calculer le total pour ce produit
-            totalPrice += totalProduit; // Ajouter au total général
+                let totalProduit = quantite * prixUnitaire; // Calculer le total pour ce produit
+                totalPrice += totalProduit; // Ajouter au total général
 
-            // Ajouter l'article à la liste
-            let listItem = `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    ${nom}
-                    <span class="badge badge-pill badge-secondary" style="color: green;">Prix unitaire : ${prixUnitaire.toFixed(2)} €</span>
-                    <span class="badge badge-pill badge-primary" style="color: blue;">Quantité : ${quantite}</span>
-                    <span class="badge badge-pill badge-danger">Total : ${totalProduit.toFixed(2)} €</span>
-                </li>
-            `;
-            itemList.innerHTML += listItem;
+                // Ajouter l'article à la liste avec des boutons de gestion
+                let listItem = `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>${nom}</strong><br>
+                            <span>Prix unitaire : ${prixUnitaire.toFixed(2)} €</span>
+                        </div>
+                        <div>
+                            <button class="btn btn-sm btn-warning reduce" data-id="${item}">-</button>
+                            <span>Quantité : ${quantite}</span>
+                            <button class="btn btn-sm btn-success add" data-id="${item}">+</button>
+                        </div>
+                        <button class="btn btn-sm btn-danger delete" data-id="${item}">Supprimer</button>
+                        <span>Total : ${totalProduit.toFixed(2)} €</span>
+                    </li>
+                `;
+                itemList.innerHTML += listItem;
+            }
         }
 
-        // Ajouter le prix total dans le champ caché
+        // Mettre à jour le prix total
         totalPriceDisplay.innerHTML = `Prix total : ${totalPrice.toFixed(2)} €`;
+
+        // Mettre à jour le champ caché
         panierInput.value = JSON.stringify(panier);
+
+        // Sauvegarder dans le localStorage
+        localStorage.setItem('panier', JSON.stringify(panier));
     }
+
+    // Gestion des boutons de réduction, augmentation et suppression
+    document.addEventListener('click', function (e) {
+        if (e.target.classList.contains('reduce')) {
+            const id = e.target.getAttribute('data-id');
+            if (panier[id][0] > 1) {
+                panier[id][0] -= 1; // Réduire la quantité
+            } else {
+                delete panier[id]; // Supprimer si la quantité atteint 0
+            }
+            updatePanier();
+        }
+
+        if (e.target.classList.contains('add')) {
+            const id = e.target.getAttribute('data-id');
+            panier[id][0] += 1; // Augmenter la quantité
+            updatePanier();
+        }
+
+        if (e.target.classList.contains('delete')) {
+            const id = e.target.getAttribute('data-id');
+            delete panier[id]; // Supprimer complètement le produit
+            updatePanier();
+        }
+    });
+
+    // Initialiser l'affichage du panier
+    updatePanier();
 
     // Nettoyer le panier après validation (facultatif)
     document.getElementById('checkout-form').addEventListener('submit', function () {

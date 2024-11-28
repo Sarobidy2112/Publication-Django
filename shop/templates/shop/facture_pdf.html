@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .header, .footer { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Facture n°{{ commande.id }}</h1>
+        <p>Date : {{ commande.date_ordered|date:"d/m/Y" }}</p>
+    </div>
+
+    <h3>Informations sur l'entreprise</h3>
+    <p>Nom de l'entreprise : Mon E-Commerce</p>
+    <p>Adresse : 123 Rue de la Startup, Antananarivo, Madagascar</p>
+    <p>Email : contact@mon-ecommerce.mg</p>
+
+    <h3>Informations du client</h3>
+    <p>Nom : {{ commande.user.first_name }} {{ commande.user.last_name }}</p>
+    <p>Email : {{ commande.user.email }}</p>
+
+    <h3>Détails de la commande</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Produit</th>
+                <th>Quantité</th>
+                <th>Prix unitaire (€)</th>
+                <th>Total (€)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items_with_total %}
+                <tr>
+                    <td>{{ item.product.title }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.product.price }}</td>
+                    <td>{{ item.total_price }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3">Total général</th>
+                <th>{{ total_general }} €</th>
+            </tr>
+        </tfoot>
+    </table>
+</body>
+</html>

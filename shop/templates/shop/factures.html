@@ -1,0 +1,49 @@
+{% extends "shop/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Mes Factures</h1>
+
+    {% if commandes_non_payees %}
+        <ul class="list-group">
+            <h1>Factures pour les commandes non payées</h1>
+            {% for commande in commandes_non_payees %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        Facture n°{{ commande.id }} - {{ commande.date_ordered|date:"d/m/Y" }} - Total : {{ commande.total_price }} €
+                    </span>
+                    <a href="{% url 'facture_detail' commande.id %}" class="btn btn-primary">Voir la facture</a>
+                    <a href="{% url 'annuler_commande' commande.id %}" class="btn btn-danger" onclick="return confirmAnnulation()">Annuler la commande</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-center">Vous n'avez aucune commande en attente de paiement.</p>
+    {% endif %}
+
+    {% if commandes_payees %}
+        <ul class="list-group mt-5">
+            <h1>Factures pour les commandes payées</h1>
+            {% for commande in commandes_payees %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>
+                        Facture n°{{ commande.id }} - {{ commande.date_ordered|date:"d/m/Y" }} - Total : {{ commande.total_price }} €
+                    </span>
+                    <a href="{% url 'generer_facture_pdf' commande.id %}" class="btn btn-primary mt-3">
+                        Télécharger la facture en PDF
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+</div>
+
+<script>
+    // Fonction pour afficher une confirmation avant l'annulation
+    function confirmAnnulation() {
+        return confirm("Êtes-vous sûr de vouloir annuler cette commande ? Cette action est irréversible.");
+    }
+</script>
+
+{% endblock content %}

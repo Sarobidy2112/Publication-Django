@@ -11,7 +11,7 @@
         <!-- Bouton de déconnexion -->
         <form action="{% url 'logout' %}" method="post">
             {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Se déconnecter</button>
+            <button type="submit" class="btn btn-danger" id="logout-link">Se déconnecter</button>
         </form>
     {% else %}
         <div class="alert alert-warning" role="alert">
@@ -27,5 +27,18 @@
         <a href="{% url 'liste_publications' %}" class="btn btn-success">Voir les Publications</a>
     </div>
 </div>
+
+<script>
+    window.onload = function() {
+        if ({{ user.is_authenticated|yesno:"true,false" }}) {
+            localStorage.clear();
+        }
+    };
+
+    // Vider le localStorage lors de la déconnexion
+    document.getElementById("logout-link").addEventListener("click", function() {
+        localStorage.clear();  // Effacer le localStorage à la déconnexion
+    });
+</script>
 
 {% endblock content %}
