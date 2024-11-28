@@ -1,0 +1,296 @@
+Le code que vous avez fourni pour checkout.html semble déjà bien configuré pour afficher les articles du panier et gérer l'envoi des informations. Cependant, il semble que vous rencontriez un problème avec les données du produit, notamment le prix unitaire.
+
+Je vais vous donner quelques suggestions pour résoudre ces problèmes et améliorer le code.
+
+Problèmes potentiels :
+Données incorrectes dans panier : Vous mentionnez que les données du produit sont incorrectes, notamment pour le prix unitaire. Cela peut se produire si les données du panier dans localStorage ne sont pas correctement formatées ou si elles sont mal récupérées.
+
+Mauvaise gestion des types de données : Vous utilisez parseInt pour récupérer la valeur du prix unitaire, mais le prix peut être un nombre à virgule (par exemple 12.99), auquel cas il serait préférable d'utiliser parseFloat pour garantir que le prix est correctement récupéré.
+
+Solutions proposées :
+Assurez-vous que les données du panier sont correctement formatées lorsque vous les ajoutez dans le localStorage. Quand vous ajoutez un produit au panier, assurez-vous que le prix est bien un nombre à virgule (et non un entier).
+
+Vérifiez la récupération des données dans checkout.html : Au lieu d'utiliser parseInt pour les prix, utilisez parseFloat pour garantir que les prix sont correctement récupérés.
+
+Correction du code checkout.html :
+Voici le code corrigé pour checkout.html :
+
+{% extends "shop/base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Votre panier</h1>
+
+    <!-- Liste des produits dans le panier -->
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="list-group" id="item-list">
+                <!-- Les articles seront ajoutés dynamiquement ici -->
+                <h3 class="text-center" id="empty-message">Votre panier est vide.</h3>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Affichage du total global -->
+    <div class="row mt-4">
+        <div class="col-md-12 text-right">
+            <h4 id="total-price">Prix total : 0 €</h4>
+        </div>
+    </div>
+
+    <!-- Formulaire de commande -->
+    <form method="POST" id="checkout-form" class="mt-5">
+        {% csrf_token %}
+        <input type="hidden" id="panier" name="panier"> <!-- Champ caché pour transmettre les données du panier -->
+        <button type="submit" class="btn btn-primary btn-lg btn-block" id="checkout-button" disabled>
+            Passer la commande
+        </button>
+    </form>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script type="text/javascript">
+    // Récupérer le panier depuis le localStorage
+    let panier = localStorage.getItem('panier') ? JSON.parse(localStorage.getItem('panier')) : {};
+
+    const itemList = document.getElementById('item-list');
+    const emptyMessage = document.getElementById('empty-message');
+    const checkoutButton = document.getElementById('checkout-button');
+    const panierInput = document.getElementById('panier');
+    const totalPriceDisplay = document.getElementById('total-price');
+
+    let totalPrice = 0;
+
+    // Vérifier si le panier est vide
+    if (Object.keys(panier).length === 0) {
+        emptyMessage.style.display = "block";
+        checkoutButton.disabled = true;
+    } else {
+        emptyMessage.style.display = "none";
+        checkoutButton.disabled = false;
+
+        // Ajouter les articles du panier à la liste
+        for (let item in panier) {
+            let details = panier[item]; // Récupérer les données du produit
+
+            let quantite = parseInt(details[0]); // Quantité
+            let nom = details[1]; // Nom du produit
+            let prixUnitaire = parseFloat(details[2]); // Prix unitaire (converti en float)
+
+            let totalProduit = quantite * prixUnitaire; // Calculer le total pour ce produit
+            totalPrice += totalProduit; // Ajouter au total général
+
+            // Ajouter l'article à la liste
+            let listItem = `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${nom}
+                    <span class="badge badge-pill badge-secondary" style="color: green;">Prix unitaire : ${prixUnitaire.toFixed(2)} €</span>
+                    <span class="badge badge-pill badge-primary" style="color: blue;">Quantité : ${quantite}</span>
+                    <span class="badge badge-pill badge-danger">Total : ${totalProduit.toFixed(2)} €</span>
+                </li>
+            `;
+            itemList.innerHTML += listItem;
+        }
+
+        // Ajouter le prix total dans le champ caché
+        totalPriceDisplay.innerHTML = `Prix total : ${totalPrice.toFixed(2)} €`;
+        panierInput.value = JSON.stringify(panier);
+    }
+
+    // Nettoyer le panier après validation (facultatif)
+    document.getElementById('checkout-form').addEventListener('submit', function () {
+        localStorage.removeItem('panier');
+    });
+</script>
+{% endblock scripts %}
+Explications des modifications :
+Changement de parseInt à parseFloat pour le prix unitaire : J'ai remplacé parseInt(details[2]) par parseFloat(details[2]) pour garantir que le prix est traité comme un nombre décimal, car le prix d'un produit est souvent un nombre avec des décimales (par exemple, 12.99).
+
+Affichage des détails du produit : Les informations concernant le nom, la quantité, le prix unitaire et le total pour chaque produit sont désormais affichées de manière correcte, en ajoutant les éléments au ul avec id="item-list".
+
+Affichage du prix total : Le total global est calculé et affiché dans le format prix total : X €.
+
+Problème possible :
+Si malgré cela, vous avez toujours un problème avec les données qui semblent incorrectes (par exemple des valeurs undefined pour le prix), il peut être utile de vérifier la manière dont vous stockez les produits dans le localStorage depuis index.html. Assurez-vous que chaque produit est correctement formaté avec la quantité, le nom et le prix avant de l'ajouter au panier.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------
+
+
+
+
+Pour intégrer correctement la gestion du panier via localStorage et le transfert des produits vers le fichier checkout.html, je vais vous donner des ajustements à effectuer dans votre fichier index.html ainsi que quelques recommandations pour garantir que les données du panier sont bien enregistrées et transmises lors du passage au checkout.
+
+1. Le fichier index.html avec gestion du panier via localStorage
+Voici le code de votre fichier index.html avec les ajustements nécessaires pour la gestion du panier. Le script JavaScript met à jour le localStorage à chaque ajout de produit au panier et crée un lien dynamique vers la page de checkout.
+
+{% extends "shop/base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <form class="d-flex" role="search">
+      <input class="form-control me-2" name="search-item-name" type="search" placeholder="Rechercher nom de produit ..." aria-label="Rechercher">
+      <button class="btn btn-outline-success" type="submit">Rechercher</button>
+    </form>
+</div>
+
+<div class="container my-5">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        {% if message %}
+            <p>{{ message }}</p>
+        {% endif %}
+        
+        {% for produit in produits %}
+            <div class="col">
+
+                <div class="card">
+                        <img src="{{ produit.image.url }}" class="card-img-top">
+                        <div class="card-body">
+                            <h5 id="a{{ produit.id }}" class="card-title">{{ produit.title }}</h5>
+                            <p class="card-price">{{ produit.price }} €</p>
+                            <a href="{% url 'shop:detail' produit.id %}" class="btn btn-primary">Voir</a>
+                            <a href="#" id="{{ produit.id }}" class="btn btn-success ajouter">Ajouter</a>
+                        </div>
+                </div>
+
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock content %}
+
+
+{% block scripts %}
+    <script type="text/javascript">
+        // Vérifie si le panier existe dans le localStorage
+        let panier = localStorage.getItem('panier') ? JSON.parse(localStorage.getItem('panier')) : {};
+
+        $(document).on('click', '.ajouter', function () {
+            let item_id = this.id.toString();
+            if (panier[item_id] !== undefined) {
+                // Si le produit existe déjà dans le panier, on augmente la quantité
+                let quantite = panier[item_id][0] + 1;
+                panier[item_id][0] = quantite;
+            } else {
+                // Si le produit n'est pas encore dans le panier, on l'ajoute avec une quantité de 1
+                let quantite = 1;
+                let nom = document.getElementById("a" + item_id).innerHTML;
+                let prix = parseFloat(document.querySelector(`#a${item_id}`).closest('.card').querySelector('.card-price').textContent.replace(' €', '').trim());
+                panier[item_id] = [quantite, nom, prix];  // Ajout du produit avec quantité, nom et prix unitaire
+            }
+            console.log(panier);
+
+            // Mise à jour du panier dans le localStorage
+            localStorage.setItem('panier', JSON.stringify(panier));
+
+            // Mise à jour de l'affichage du nombre d'articles dans le panier
+            document.getElementById("panier").innerHTML = "Panier(" + Object.keys(panier).length + ")";
+        });
+
+        ListePannier(panier);
+
+        function ListePannier(panier) {
+            let panierListe = "<h6>Liste de(s) produit(s) ajouté(s) : </h6>";
+            let index = 1;
+            for (let i in panier) {
+                panierListe += `${index}. ${panier[i][1]} ---> Quantité : ${panier[i][0]} <br>`;
+                index++;
+            }
+
+            panierListe += "<br><a href='{% url 'checkout' %}' class='btn btn-primary'>Checkout</a>";
+            
+            // Mise à jour du contenu du popover pour afficher la liste des produits
+            document.getElementById('panier').setAttribute('data-content', panierListe);
+        }
+    </script>
+{% endblock scripts %}
+Explications des changements :
+Ajout du prix unitaire dans le panier :
+
+Lorsque vous ajoutez un produit au panier, je récupère également son prix unitaire en utilisant la classe .card-price pour extraire le prix du produit. Le prix est ajouté avec le nom et la quantité dans panier[item_id] = [quantite, nom, prix];.
+Mise à jour du panier :
+
+Après chaque ajout, le panier est enregistré dans localStorage avec localStorage.setItem('panier', JSON.stringify(panier));.
+Le nombre de produits dans le panier est mis à jour dynamiquement avec document.getElementById("panier").innerHTML.
+Affichage du contenu du panier dans un popover :
+
+La fonction ListePannier(panier) crée une liste des produits ajoutés au panier et la met à jour dynamiquement dans un popover. La fonction est appelée chaque fois que le panier est modifié.
+4. Passer le panier à checkout.html
+Pour passer le panier de index.html à checkout.html, vous pouvez ajouter les données du panier dans un champ caché dans le formulaire de checkout. Dans votre checkout.html, vous pouvez ensuite récupérer et afficher les informations du panier.
+
+Voici un exemple de ce que vous pouvez ajouter dans checkout.html :
+
+{% extends "shop/base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-4">Votre Panier</h1>
+    
+    <!-- Liste des produits -->
+    <ul class="list-group" id="item-list"></ul>
+
+    <!-- Affichage du prix total -->
+    <h3 id="total-price">Prix total: 0 €</h3>
+
+    <!-- Formulaire de commande -->
+    <form method="POST" id="checkout-form">
+        {% csrf_token %}
+        <input type="hidden" id="panier" name="panier">
+        <button type="submit" class="btn btn-primary">Passer la commande</button>
+    </form>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+<script type="text/javascript">
+    let panier = localStorage.getItem('panier') ? JSON.parse(localStorage.getItem('panier')) : {};
+
+    if (Object.keys(panier).length > 0) {
+        let totalPrice = 0;
+        let itemList = '';
+        
+        for (let item in panier) {
+            let details = panier[item];
+            let quantite = details[0];
+            let nom = details[1];
+            let prixUnitaire = details[2];
+            let totalProduit = quantite * prixUnitaire;
+            totalPrice += totalProduit;
+
+            itemList += `<li class="list-group-item">
+                ${nom} - ${quantite} x ${prixUnitaire.toFixed(2)} € = ${totalProduit.toFixed(2)} €
+            </li>`;
+        }
+
+        document.getElementById('item-list').innerHTML = itemList;
+        document.getElementById('total-price').innerText = `Prix total: ${totalPrice.toFixed(2)} €`;
+
+        // Passer les données du panier au formulaire caché
+        document.getElementById('panier').value = JSON.stringify(panier);
+    } else {
+        document.getElementById('item-list').innerHTML = '<li class="list-group-item">Votre panier est vide.</li>';
+    }
+</script>
+{% endblock scripts %}
+Explications :
+Affichage des produits et du total du panier :
+Le script parcourt le panier et affiche chaque produit avec sa quantité, son prix unitaire, et son total. Le prix total est également calculé et affiché.
+Passage du panier via un champ caché :
+Le panier est converti en chaîne JSON et inséré dans un champ caché (<input type="hidden" id="panier" name="panier">) afin de le transmettre lors de la soumission du formulaire.
+Avec ces ajustements, vous devriez pouvoir gérer le panier sur index.html et le transmettre correctement vers checkout.html pour la validation de la commande.
