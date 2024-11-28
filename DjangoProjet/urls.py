@@ -9,7 +9,8 @@ urlpatterns = [
     path('', include('home.urls')),  # Inclure l'URL de l'application 'home' pour la page d'accueil
     path('accounts/', include('accounts.urls')),  # Routes pour l'application 'accounts'
     path('publications/', include('publications.urls')),
-    path('shop/', include('shop.urls'))
+    path('shop/', include('shop.urls')),
+    path('formations/', include('formations.urls'))
 ]
 
 if settings.DEBUG:
