@@ -8,7 +8,6 @@
         <div class="alert alert-success" role="alert">
             <p>Bienvenue, {{ user.first_name }} {{ user.last_name }} !</p>
         </div>
-        <!-- Bouton de déconnexion -->
         <form action="{% url 'logout' %}" method="post">
             {% csrf_token %}
             <button type="submit" class="btn btn-danger" id="logout-link">Se déconnecter</button>
@@ -17,7 +16,6 @@
         <div class="alert alert-warning" role="alert">
             <p>Vous n'êtes pas connecté.</p>
         </div>
-        <!-- Bouton de connexion -->
         <a href="{% url 'login' %}">
             <button class="btn btn-primary">Se connecter</button>
         </a>
@@ -35,9 +33,8 @@
         }
     };
 
-    // Vider le localStorage lors de la déconnexion
     document.getElementById("logout-link").addEventListener("click", function() {
-        localStorage.clear();  // Effacer le localStorage à la déconnexion
+        localStorage.clear();
     });
 </script>
 
