@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Product, Commande, CommandeItem
+from .models import Product, Commande, CommandeItem, Category
 from django.db.models import F, Sum
 from django.template.loader import render_to_string
 from weasyprint import HTML
@@ -11,16 +11,25 @@ import os
 # Vue pour la page d'accueil
 def index(request):
     produits = Product.objects.all()
+    categories = Category.objects.all()  # Récupérer toutes les catégories
+    selected_category = request.GET.get('category')  # Récupérer la catégorie sélectionnée
     search_itemName = request.GET.get('search-item-name')
     message = ""
 
+    # Filtrer par catégorie si une catégorie est sélectionnée
+    if selected_category:
+        produits = produits.filter(category_id=selected_category)
+
+    # Filtrer par recherche de nom si un terme est saisi
     if search_itemName:
-        produits = Product.objects.filter(title__icontains=search_itemName)
+        produits = produits.filter(title__icontains=search_itemName)
         if not produits:
             message = "Aucun résultat trouvé."
 
     return render(request, 'shop/index.html', {
         'produits': produits,
+        'categories': categories,
+        'selected_category': selected_category,
         'message': message,
     })
 

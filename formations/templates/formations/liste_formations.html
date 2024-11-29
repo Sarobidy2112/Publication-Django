@@ -1,9 +1,9 @@
-{% extends "formations/base.html" %}
+{% extends "base.html" %}
 
 {% block style %}
 <style>
     .card {
-        height: 350px; /* Fixe une hauteur spécifique pour chaque carte */
+        height: 350px; 
         display: flex;
         flex-direction: column;
     }
@@ -12,24 +12,33 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        height: 100%; /* Assure que la carte prend toute la hauteur disponible */
+        height: 100%; 
     }
 
     .card .btn {
-        margin-top: 10px; /* Ajoute une marge entre les boutons */
+        margin-top: 10px; 
     }
 
-    /* Ajuste la taille des icônes dans les cartes */
     .card i.info {
-        font-size: 15px /* Définit une taille plus grande pour les icônes */
+        font-size: 15px
     }
 </style>
 {% endblock style %}
 
 {% block content %}
-
 <div class="container mt-5">
     <h1 class="text-center mb-4">Formations disponibles</h1>
+    
+    <!-- Formulaire de filtre -->
+    <form method="get" class="mb-4 d-flex justify-content-center">
+        <select name="type" class="form-select w-auto me-2">
+            <option value="" {% if not type_filtre %}selected{% endif %}>Tous</option>
+            <option value="PDF" {% if type_filtre == "PDF" %}selected{% endif %}>PDF</option>
+            <option value="VIDEO" {% if type_filtre == "VIDEO" %}selected{% endif %}>Vidéo</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Filtrer</button>
+    </form>
+    
     <div class="row">
         {% for formation in formations %}
             <div class="col-md-4 mb-4">
@@ -77,5 +86,4 @@
         {% endfor %}
     </div>
 </div>
-
 {% endblock content %}

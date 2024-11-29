@@ -63,8 +63,10 @@ ROOT_URLCONF = 'DjangoProjet.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'DIRS': [
+            BASE_DIR / 'templates',  # Dossier global des templates
+        ],
+        'APP_DIRS': True,  # Permet à Django de rechercher des templates dans chaque app (comme mon_app/templates)
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -75,6 +77,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 WSGI_APPLICATION = 'DjangoProjet.wsgi.application'
 
